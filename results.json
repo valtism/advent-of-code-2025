@@ -36,6 +36,18 @@
         "attempts": [],
         "time": 2.45
       }
+    },
+    {
+      "part1": {
+        "result": "1419",
+        "attempts": [],
+        "time": 4.64
+      },
+      "part2": {
+        "result": "8739",
+        "attempts": [],
+        "time": 45.7
+      }
     }
   ]
 }
