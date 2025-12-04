@@ -1,0 +1,41 @@
+{
+  "year": 2025,
+  "days": [
+    {
+      "part1": {
+        "result": "1182",
+        "attempts": [],
+        "time": 0.985
+      },
+      "part2": {
+        "result": "6907",
+        "attempts": [],
+        "time": 2.6
+      }
+    },
+    {
+      "part1": {
+        "result": "23701357374",
+        "attempts": [],
+        "time": 35.4
+      },
+      "part2": {
+        "result": "34284458938",
+        "attempts": [],
+        "time": 228
+      }
+    },
+    {
+      "part1": {
+        "result": "17613",
+        "attempts": [],
+        "time": 17.3
+      },
+      "part2": {
+        "result": "175304218462560",
+        "attempts": [],
+        "time": 2.45
+      }
+    }
+  ]
+}
