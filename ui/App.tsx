@@ -171,6 +171,7 @@ export function App() {
           day={phase.day}
           sessionKey={phase.sessionKey}
           puzzleInput={phase.puzzleInput}
+          results={phase.results}
           onResultsUpdate={(results) => {
             if (phase.type === "running") {
               setPhase({ ...phase, results });

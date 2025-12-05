@@ -11,6 +11,7 @@ export const colors = {
   cyan: "#66d0df",
   blue: "#8fc2fd",
   purple: "#c5b0f6",
+  gray: "#c5c5c5",
 } as const;
 
 // Semantic color mappings for consistent usage

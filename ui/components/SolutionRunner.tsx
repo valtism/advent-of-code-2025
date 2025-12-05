@@ -15,6 +15,7 @@ interface SolutionRunnerProps {
   day: number;
   sessionKey: string;
   puzzleInput: string;
+  results: Results;
   onResultsUpdate: (results: Results) => void;
 }
 
@@ -23,6 +24,7 @@ export function SolutionRunner({
   day,
   sessionKey,
   puzzleInput,
+  results,
   onResultsUpdate,
 }: SolutionRunnerProps) {
   const [output, setOutput] = useState<string[]>([]);
@@ -157,11 +159,17 @@ export function SolutionRunner({
     };
   }, [dayFilePath, puzzleInput, spawnSubprocess]);
 
-  const submitOptions: TabSelectOption[] = solutionResults.map((r) => ({
-    name: `Part ${r.part}`,
-    description: `${r.answer} (${r.timeMs.toFixed(2)}ms)`,
-    value: r.part,
-  }));
+  const dayResult = results.days[day - 1];
+  const submitOptions: TabSelectOption[] = solutionResults.map((r) => {
+    const partResult = r.part === 1 ? dayResult?.part1 : dayResult?.part2;
+    const isSolved = partResult?.result !== null && partResult?.result !== undefined;
+    const checkMark = isSolved ? "\u2713 " : "";
+    return {
+      name: `${checkMark}Part ${r.part}`,
+      description: `${r.answer} (${r.timeMs.toFixed(2)}ms)`,
+      value: r.part,
+    };
+  });
 
   return (
     <box flexDirection="column" width="100%" height="100%">
@@ -213,5 +221,5 @@ function getLineColor(line: string): string {
   if (line.includes("\u2717")) return colors.orange;
   if (line.includes("Result:")) return colors.pink;
   if (line.includes("Error:")) return colors.orange;
-  return colors.purple;
+  return colors.gray;
 }

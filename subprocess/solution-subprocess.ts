@@ -197,6 +197,7 @@ async function listenForCommands(solutionResults: SolutionResult[]) {
 
 // Main execution
 const solutionResults: SolutionResult[] = [];
+const results = await loadResults();
 
 try {
   const module = await import(`../${dayFilePath}?t=${Date.now()}`);
@@ -230,7 +231,12 @@ try {
       const start = performance.now();
       const result = part.solution(puzzleInput);
       const timeMs = performance.now() - start;
-      output(`  Result: ${result} (${timeMs.toFixed(2)}ms)`);
+      const partResult = getPartResult(results, dayIndex, partNum as 1 | 2);
+      let statusMark = "  ";
+      if (partResult.result !== null) {
+        statusMark = String(result) === partResult.result ? "\u2713 " : "\u2717 ";
+      }
+      output(`  ${statusMark}Result: ${result} (${timeMs.toFixed(2)}ms)`);
 
       if (result !== undefined && result !== null) {
         const solutionResult: SolutionResult = {
