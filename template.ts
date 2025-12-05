@@ -1,9 +1,11 @@
+import dedent from "dedent";
+
 export const run = {
   part1: {
     tests: [
       // {
-      //   input: ``,
-      //   expected: "",
+      //   input: dedent``,
+      //   expected: null,
       // },
     ],
     solution: part1,
@@ -11,8 +13,8 @@ export const run = {
   part2: {
     tests: [
       // {
-      //   input: ``,
-      //   expected: "",
+      //   input: dedent``,
+      //   expected: null,
       // },
     ],
     solution: part2,
