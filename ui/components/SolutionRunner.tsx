@@ -1,12 +1,12 @@
+import { TextAttributes, type TabSelectOption } from "@opentui/core";
 import type { Subprocess } from "bun";
-import { type TabSelectOption, TextAttributes } from "@opentui/core";
 import { watch, type FSWatcher } from "fs";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { colors } from "../colors";
 import type {
   Results,
-  SubprocessMessage,
   SolutionResult,
+  SubprocessMessage,
   ToSubprocessMessage,
 } from "../types";
 
@@ -14,7 +14,7 @@ interface SolutionRunnerProps {
   year: number;
   day: number;
   sessionKey: string;
-  results: Results;
+  puzzleInput: string;
   onResultsUpdate: (results: Results) => void;
 }
 
@@ -22,49 +22,18 @@ export function SolutionRunner({
   year,
   day,
   sessionKey,
-  results,
+  puzzleInput,
   onResultsUpdate,
 }: SolutionRunnerProps) {
   const [output, setOutput] = useState<string[]>([]);
   const [solutionResults, setSolutionResults] = useState<SolutionResult[]>([]);
   const [isReady, setIsReady] = useState(false);
-  const [setupStatus, setSetupStatus] = useState<string>("");
 
   const subprocessRef = useRef<Subprocess | null>(null);
   const watcherRef = useRef<FSWatcher | null>(null);
 
   const dayStr = day.toString().padStart(2, "0");
   const dayFilePath = `src/day${dayStr}.ts`;
-  const inputFilePath = `src/day${dayStr}-input.txt`;
-
-  // Download input and create solution file if needed
-  const setup = useCallback(async () => {
-    const inputFile = Bun.file(inputFilePath);
-    if (!(await inputFile.exists())) {
-      setSetupStatus(`Downloading input...`);
-      const response = await fetch(
-        `https://adventofcode.com/${year}/day/${day}/input`,
-        { headers: { Cookie: `session=${sessionKey}` } }
-      );
-
-      if (!response.ok) {
-        setOutput([`Failed to fetch input: ${response.status}`]);
-        return null;
-      }
-
-      await Bun.write(inputFile, await response.text());
-      setSetupStatus(`Downloaded ${inputFilePath}`);
-    }
-
-    const dayFile = Bun.file(dayFilePath);
-    if (!(await dayFile.exists())) {
-      const template = await Bun.file("template.ts").text();
-      await Bun.write(dayFile, template);
-      setSetupStatus(`Created ${dayFilePath} from template`);
-    }
-
-    return inputFile.text();
-  }, [year, day, sessionKey, dayFilePath, inputFilePath]);
 
   // Spawn the subprocess
   const spawnSubprocess = useCallback(
@@ -93,7 +62,7 @@ export function SolutionRunner({
           stdout: "pipe",
           stderr: "pipe",
           stdin: "pipe",
-        }
+        },
       );
 
       subprocessRef.current = proc;
@@ -154,7 +123,7 @@ export function SolutionRunner({
 
       readOutput();
     },
-    [dayFilePath, day, sessionKey, onResultsUpdate]
+    [dayFilePath, day, sessionKey, onResultsUpdate],
   );
 
   // Send submit command to subprocess
@@ -167,23 +136,15 @@ export function SolutionRunner({
     }
   }, []);
 
-  // Initial setup and run
+  // Initial run and file watching
   useEffect(() => {
-    const init = async () => {
-      const puzzleInput = await setup();
-      if (puzzleInput) {
-        setSetupStatus("");
-        await spawnSubprocess(puzzleInput);
+    spawnSubprocess(puzzleInput);
 
-        // Watch for file changes - only after setup has created the file
-        const watcher = watch(dayFilePath, async () => {
-          await spawnSubprocess(puzzleInput);
-        });
-        watcherRef.current = watcher;
-      }
-    };
-
-    init();
+    // Watch for file changes
+    const watcher = watch(dayFilePath, async () => {
+      await spawnSubprocess(puzzleInput);
+    });
+    watcherRef.current = watcher;
 
     // Cleanup
     return () => {
@@ -194,11 +155,11 @@ export function SolutionRunner({
         watcherRef.current.close();
       }
     };
-  }, [dayFilePath, setup, spawnSubprocess]);
+  }, [dayFilePath, puzzleInput, spawnSubprocess]);
 
   const handleSubmitSelect = (
     _index: number,
-    option: TabSelectOption | null
+    option: TabSelectOption | null,
   ) => {
     if (option?.value) {
       submitAnswer(option.value as 1 | 2);
@@ -224,13 +185,6 @@ export function SolutionRunner({
           Advent of Code {year} - Day {day}
         </text>
       </box>
-
-      {/* Setup status */}
-      {setupStatus && (
-        <box paddingLeft={1}>
-          <text fg={colors.blue}>{setupStatus}</text>
-        </box>
-      )}
 
       {/* Output area */}
       <scrollbox flexGrow={1} paddingLeft={1} paddingRight={1}>

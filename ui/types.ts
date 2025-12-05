@@ -44,4 +44,5 @@ export type AppPhase =
       day: number;
       sessionKey: string;
       results: Results;
+      puzzleInput: string;
     };

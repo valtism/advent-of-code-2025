@@ -36,6 +36,38 @@ async function saveResults(results: Results): Promise<void> {
   await Bun.write(resultsPath, JSON.stringify(results, null, 2) + "\n");
 }
 
+async function setupDay(
+  year: number,
+  day: number,
+  sessionKey: string,
+): Promise<string | null> {
+  const dayStr = day.toString().padStart(2, "0");
+  const dayFilePath = `src/day${dayStr}.ts`;
+  const inputFilePath = `src/day${dayStr}-input.txt`;
+
+  const inputFile = Bun.file(inputFilePath);
+  if (!(await inputFile.exists())) {
+    const response = await fetch(
+      `https://adventofcode.com/${year}/day/${day}/input`,
+      { headers: { Cookie: `session=${sessionKey}` } },
+    );
+
+    if (!response.ok) {
+      return null;
+    }
+
+    await Bun.write(inputFile, await response.text());
+  }
+
+  const dayFile = Bun.file(dayFilePath);
+  if (!(await dayFile.exists())) {
+    const template = await Bun.file("template.ts").text();
+    await Bun.write(dayFile, template);
+  }
+
+  return inputFile.text();
+}
+
 export function App() {
   const [phase, setPhase] = useState<AppPhase>({ type: "loading" });
   const [sessionKey, setSessionKey] = useState<string | null>(null);
@@ -91,8 +123,18 @@ export function App() {
     setPhase({ type: "day_selection", year, results });
   };
 
-  const handleDaySelect = (day: number) => {
+  const handleDaySelect = async (day: number) => {
     if (phase.type !== "day_selection" || !sessionKey) return;
+
+    const puzzleInput = await setupDay(phase.year, day, sessionKey);
+    if (!puzzleInput) {
+      // TODO: Handle setup failure
+      return;
+    }
+
+    const fetcher = await (
+      await fetch("https://jsonplaceholder.typicode.com/todos/2")
+    ).json();
 
     setPhase({
       type: "running",
@@ -100,6 +142,7 @@ export function App() {
       day,
       sessionKey,
       results: phase.results,
+      puzzleInput,
     });
   };
 
@@ -139,7 +182,7 @@ export function App() {
           year={phase.year}
           day={phase.day}
           sessionKey={phase.sessionKey}
-          results={phase.results}
+          puzzleInput={phase.puzzleInput}
           onResultsUpdate={handleResultsUpdate}
         />
       )}
