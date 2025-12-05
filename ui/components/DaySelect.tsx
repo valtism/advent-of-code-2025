@@ -51,14 +51,9 @@ export function DaySelect({ year, results, onSelect }: DaySelectProps) {
     return {
       name: `Day ${dayStr}  ${status}`,
       value: day,
+      description: "",
     };
   });
-
-  const handleSelect = (_index: number, option: SelectOption | null) => {
-    if (option?.value) {
-      onSelect(option.value as number);
-    }
-  };
 
   return (
     <box flexDirection="column">
@@ -69,7 +64,11 @@ export function DaySelect({ year, results, onSelect }: DaySelectProps) {
         focused
         options={options}
         selectedIndex={defaultIndex}
-        onSelect={handleSelect}
+        onSelect={(_index, option) => {
+          if (option?.value) {
+            onSelect(option.value as number);
+          }
+        }}
         height={Math.min(maxDays + 2, 20)}
         showDescription={false}
         focusedBackgroundColor="transparent"

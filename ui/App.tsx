@@ -105,53 +105,6 @@ export function App() {
     init();
   }, []);
 
-  const handleSessionKeySubmit = async (key: string) => {
-    await saveSessionKey(key);
-    setSessionKey(key);
-
-    const results = await loadResults();
-    if (!results) {
-      setPhase({ type: "year_selection" });
-    } else {
-      setPhase({ type: "day_selection", year: results.year, results });
-    }
-  };
-
-  const handleYearSelect = async (year: number) => {
-    const results: Results = { year, days: [] };
-    await saveResults(results);
-    setPhase({ type: "day_selection", year, results });
-  };
-
-  const handleDaySelect = async (day: number) => {
-    if (phase.type !== "day_selection" || !sessionKey) return;
-
-    const puzzleInput = await setupDay(phase.year, day, sessionKey);
-    if (!puzzleInput) {
-      // TODO: Handle setup failure
-      return;
-    }
-
-    const fetcher = await (
-      await fetch("https://jsonplaceholder.typicode.com/todos/2")
-    ).json();
-
-    setPhase({
-      type: "running",
-      year: phase.year,
-      day,
-      sessionKey,
-      results: phase.results,
-      puzzleInput,
-    });
-  };
-
-  const handleResultsUpdate = (results: Results) => {
-    if (phase.type === "running") {
-      setPhase({ ...phase, results });
-    }
-  };
-
   return (
     <box>
       <text>Advent of Code 🎄</text>
@@ -162,18 +115,53 @@ export function App() {
         </box>
       )}
       {phase.type === "session_key_required" && (
-        <SessionKeyInput onSubmit={handleSessionKeySubmit} />
+        <SessionKeyInput
+          onSubmit={async (key) => {
+            await saveSessionKey(key);
+            setSessionKey(key);
+
+            const results = await loadResults();
+            if (!results) {
+              setPhase({ type: "year_selection" });
+            } else {
+              setPhase({ type: "day_selection", year: results.year, results });
+            }
+          }}
+        />
       )}
 
       {phase.type === "year_selection" && (
-        <YearSelect onSelect={handleYearSelect} />
+        <YearSelect
+          onSelect={async (year) => {
+            const results: Results = { year, days: [] };
+            await saveResults(results);
+            setPhase({ type: "day_selection", year, results });
+          }}
+        />
       )}
 
       {phase.type === "day_selection" && (
         <DaySelect
           year={phase.year}
           results={phase.results}
-          onSelect={handleDaySelect}
+          onSelect={async (day) => {
+            if (phase.type !== "day_selection" || !sessionKey) return;
+
+            const puzzleInput = await setupDay(phase.year, day, sessionKey);
+            if (!puzzleInput) {
+              // TODO: Handle setup failure
+              return;
+            }
+
+            setPhase({
+              type: "running",
+              year: phase.year,
+              day,
+              sessionKey,
+              results: phase.results,
+              puzzleInput,
+            });
+          }}
         />
       )}
 
@@ -183,7 +171,11 @@ export function App() {
           day={phase.day}
           sessionKey={phase.sessionKey}
           puzzleInput={phase.puzzleInput}
-          onResultsUpdate={handleResultsUpdate}
+          onResultsUpdate={(results) => {
+            if (phase.type === "running") {
+              setPhase({ ...phase, results });
+            }
+          }}
         />
       )}
     </box>

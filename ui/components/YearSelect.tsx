@@ -20,12 +20,6 @@ export function YearSelect({ onSelect }: YearSelectProps) {
     value: year,
   }));
 
-  const handleSelect = (_index: number, option: SelectOption | null) => {
-    if (option?.value) {
-      onSelect(option.value as number);
-    }
-  };
-
   return (
     <box flexDirection="column" padding={1} gap={1}>
       <text fg={colors.pink}>Select Advent of Code year:</text>
@@ -33,7 +27,11 @@ export function YearSelect({ onSelect }: YearSelectProps) {
         focused
         options={options}
         selectedIndex={years.length - 1}
-        onSelect={handleSelect}
+        onSelect={(_, option) => {
+          if (option?.value) {
+            onSelect(option.value as number);
+          }
+        }}
         height={options.length}
         showDescription={false}
         width={10}

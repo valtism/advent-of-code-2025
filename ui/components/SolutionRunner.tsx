@@ -157,15 +157,6 @@ export function SolutionRunner({
     };
   }, [dayFilePath, puzzleInput, spawnSubprocess]);
 
-  const handleSubmitSelect = (
-    _index: number,
-    option: TabSelectOption | null,
-  ) => {
-    if (option?.value) {
-      submitAnswer(option.value as 1 | 2);
-    }
-  };
-
   const submitOptions: TabSelectOption[] = solutionResults.map((r) => ({
     name: `Part ${r.part}`,
     description: `${r.answer} (${r.timeMs.toFixed(2)}ms)`,
@@ -202,7 +193,11 @@ export function SolutionRunner({
           <tab-select
             focused
             options={submitOptions}
-            onSelect={handleSubmitSelect}
+            onSelect={(_index, option) => {
+              if (option?.value) {
+                submitAnswer(option.value as 1 | 2);
+              }
+            }}
             showDescription
             tabWidth={25}
           />

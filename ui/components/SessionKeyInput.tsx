@@ -9,13 +9,6 @@ interface SessionKeyInputProps {
 export function SessionKeyInput({ onSubmit }: SessionKeyInputProps) {
   const [value, setValue] = useState("");
 
-  const handleSubmit = (submittedValue: string) => {
-    const key = submittedValue.trim();
-    if (key) {
-      onSubmit(key);
-    }
-  };
-
   return (
     <box flexDirection="column" padding={1}>
       <text fg={colors.yellow}>AOC Session Key Required</text>
