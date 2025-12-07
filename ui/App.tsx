@@ -56,7 +56,7 @@ async function setupDay(
       return null;
     }
 
-    await Bun.write(inputFile, await response.text());
+    await Bun.write(inputFile, (await response.text()).trimEnd());
   }
 
   const dayFile = Bun.file(dayFilePath);
